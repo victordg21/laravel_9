@@ -7,19 +7,26 @@ use App\Models\User;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
-{
+{   
+    protected $model;
+
+    public function __construct(User $user)
+    {
+        $this -> model = $user;
+    }
+
     public function index(Request $request)
     {
 
 
-        $users = User::where('name', 'LIKE',"%{$request -> search}%")->get();
+        $users = $this -> model -> where('name', 'LIKE',"%{$request -> search}%")->get();
 
         return view('users.index', compact('users'));
     }
 
     public function show($id)
     {
-        if (!$user = User::find($id))
+        if (!$user = $this -> model -> find($id))
             return redirect()->back();
 
         return view('users.show',compact('user'));
@@ -35,14 +42,14 @@ class UserController extends Controller
         $data = $request -> all();
         $data['password'] = bcrypt($request -> password);
 
-        User::create($data);
+        $this -> model -> create($data);
 
         return redirect()->route('users.index');
     }
 
     public function edit($id)
     {
-        if (!$user = User::find($id))
+        if (!$user = $this -> model -> find($id))
             return redirect()->back();
 
         return view('users.edit', compact('user'));    
@@ -50,7 +57,7 @@ class UserController extends Controller
 
     public function update(StoreUpdateUserFormRequest $request, $id)
     {
-        if (!$user = User::find($id))
+        if (!$user = $this -> model -> find($id))
             return redirect()->back();
 
         $data = $request -> only('name', 'email');
@@ -64,7 +71,7 @@ class UserController extends Controller
 
     public function destroy($id)
     {
-        if (!$user = User::find($id))
+        if (!$user = $this -> model -> find($id))
             return redirect()->back();
 
         $user -> delete();
